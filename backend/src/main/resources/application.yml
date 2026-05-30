@@ -2,10 +2,10 @@ spring:
   application:
     name: opensourceiq-backend
   datasource:
-    url: jdbc:h2:mem:opensourceiq;DB_CLOSE_DELAY=-1
-    username: sa
-    password: password
-    driverClassName: org.h2.Driver
+    url: jdbc:postgresql://localhost:5432/opensourceiq
+    username: postgres
+    password: postgres
+    driverClassName: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
@@ -13,10 +13,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.H2Dialect
-  h2:
-    console:
-      enabled: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   security:
     oauth2:
       client:
