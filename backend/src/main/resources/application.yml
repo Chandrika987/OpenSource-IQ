@@ -2,14 +2,14 @@ spring:
   application:
     name: opensourceiq-backend
   datasource:
-    url: jdbc:postgresql://localhost:5432/opensourceiq
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:opensourceiq}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
     driverClassName: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -19,16 +19,20 @@ spring:
       client:
         registration:
           github:
-            client-id: Ov23liHzHsqBCjNELzUc
-            client-secret: 36c3797a8b3d56f626bff826df32ebb06005a945
+            client-id: ${GITHUB_CLIENT_ID:}
+            client-secret: ${GITHUB_CLIENT_SECRET:}
+            scope: read:user,user:email
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 jwt:
   secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
-  expiration: 86400000 # 1 day
+  expiration: 86400000
+
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
 
 github:
-  client-id: ${GITHUB_CLIENT_ID:test}
-  client-secret: ${GITHUB_CLIENT_SECRET:test}
+  client-id: ${GITHUB_CLIENT_ID:}
+  client-secret: ${GITHUB_CLIENT_SECRET:}

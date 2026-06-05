@@ -8,8 +8,10 @@ C:\Users\chand\OneDrive\Desktop\OpenSource-IQ\backend\src\main\java\com\opensour
 C:\Users\chand\OneDrive\Desktop\OpenSource-IQ\backend\src\main\java\com\opensourceiq\security\OAuth2LoginSuccessHandler.java
 C:\Users\chand\OneDrive\Desktop\OpenSource-IQ\backend\src\main\java\com\opensourceiq\security\SecurityConfig.java
 C:\Users\chand\OneDrive\Desktop\OpenSource-IQ\backend\src\main\java\com\opensourceiq\security\JwtUtils.java
+C:\Users\chand\OneDrive\Desktop\OpenSource-IQ\backend\src\main\java\com\opensourceiq\controller\AuthController.java
 C:\Users\chand\OneDrive\Desktop\OpenSource-IQ\backend\src\main\java\com\opensourceiq\entity\Repository.java
 C:\Users\chand\OneDrive\Desktop\OpenSource-IQ\backend\src\main\java\com\opensourceiq\BackendApplication.java
 C:\Users\chand\OneDrive\Desktop\OpenSource-IQ\backend\src\main\java\com\opensourceiq\entity\Notification.java
 C:\Users\chand\OneDrive\Desktop\OpenSource-IQ\backend\src\main\java\com\opensourceiq\repository\UserRepository.java
 C:\Users\chand\OneDrive\Desktop\OpenSource-IQ\backend\src\main\java\com\opensourceiq\controller\DashboardController.java
+C:\Users\chand\OneDrive\Desktop\OpenSource-IQ\backend\src\main\java\com\opensourceiq\config\CorsConfig.java
