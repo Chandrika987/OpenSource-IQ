@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../../store/authStore';
 
 export default function GitHubConnect({ isOpen, onClose }) {
   const [username, setUsername] = useState('');
@@ -9,6 +10,7 @@ export default function GitHubConnect({ isOpen, onClose }) {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+  const connect = useAuthStore((state) => state.connect);
 
   const handleConnect = async (e) => {
     e.preventDefault();
@@ -25,8 +27,8 @@ export default function GitHubConnect({ isOpen, onClose }) {
         throw new Error("Failed to fetch user");
       }
       const data = await res.json();
-      
-      localStorage.setItem('github_username', data.login);
+
+      connect({ username: data.login, avatarUrl: data.avatar_url });
       setSuccess(true);
       
       setTimeout(() => {
