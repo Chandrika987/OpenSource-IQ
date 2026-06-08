@@ -8,6 +8,7 @@ import IssueInsights from '../components/issues/IssueInsights';
 import IssueSearchBar from '../components/issues/IssueSearchBar';
 import IssueStats from '../components/issues/IssueStats';
 import { getIssueCacheMeta, getIssues } from '../services/issueService';
+import { getIssueRecommendation, recommendationOptions } from '../services/issueRecommendationService';
 
 const PAGE_SIZE = 12;
 const numberFormatter = new Intl.NumberFormat('en');
@@ -20,6 +21,12 @@ const sortIssues = (issues, sortBy) => {
       return sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     case 'comments':
       return sorted.sort((a, b) => b.comments - a.comments || new Date(b.updatedAt) - new Date(a.updatedAt));
+    case 'recommended':
+      return sorted.sort(
+        (a, b) =>
+          (b.recommendation?.score || 0) - (a.recommendation?.score || 0) ||
+          new Date(b.updatedAt) - new Date(a.updatedAt)
+      );
     case 'updated':
     default:
       return sorted.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
@@ -89,7 +96,10 @@ export default function Issues() {
   const [status, setStatus] = useState('all');
   const [selectedRepository, setSelectedRepository] = useState('all');
   const [selectedLabel, setSelectedLabel] = useState('all');
-  const [sortBy, setSortBy] = useState('updated');
+  const [selectedTechStack, setSelectedTechStack] = useState('all');
+  const [selectedDomain, setSelectedDomain] = useState('all');
+  const [selectedDifficulty, setSelectedDifficulty] = useState('all');
+  const [sortBy, setSortBy] = useState('recommended');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -166,23 +176,102 @@ export default function Issues() {
     [issues]
   );
 
+  const repositoryHealthByName = useMemo(() => {
+    const health = issues.reduce((acc, issue) => {
+      if (!acc[issue.repositoryName]) {
+        acc[issue.repositoryName] = {
+          totalIssues: 0,
+          closedIssues: 0,
+          latestActivityAt: issue.updatedAt,
+        };
+      }
+
+      acc[issue.repositoryName].totalIssues += 1;
+      if (issue.state === 'closed') acc[issue.repositoryName].closedIssues += 1;
+      if (new Date(issue.updatedAt) > new Date(acc[issue.repositoryName].latestActivityAt)) {
+        acc[issue.repositoryName].latestActivityAt = issue.updatedAt;
+      }
+
+      return acc;
+    }, {});
+
+    return Object.fromEntries(
+      Object.entries(health).map(([repositoryName, metrics]) => [
+        repositoryName,
+        {
+          ...metrics,
+          resolutionRate: metrics.totalIssues ? metrics.closedIssues / metrics.totalIssues : 0,
+        },
+      ])
+    );
+  }, [issues]);
+
+  const recommendationPreferences = useMemo(
+    () => ({
+      techStack: selectedTechStack,
+      domain: selectedDomain,
+      difficulty: selectedDifficulty,
+    }),
+    [selectedDifficulty, selectedDomain, selectedTechStack]
+  );
+
+  const recommendedIssues = useMemo(
+    () =>
+      issues.map((issue) => {
+        const issueWithHealth = {
+          ...issue,
+          repositoryHealth: repositoryHealthByName[issue.repositoryName],
+        };
+
+        return {
+          ...issueWithHealth,
+          recommendation: getIssueRecommendation(issueWithHealth, recommendationPreferences),
+        };
+      }),
+    [issues, recommendationPreferences, repositoryHealthByName]
+  );
+
   const filteredIssues = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
-    const filtered = issues.filter((issue) => {
+    const filtered = recommendedIssues.filter((issue) => {
       const matchesStatus = status === 'all' || issue.state === status;
       const matchesRepository = selectedRepository === 'all' || issue.repositoryName === selectedRepository;
       const matchesLabel = selectedLabel === 'all' || issue.labels.some((label) => label.name === selectedLabel);
+      const matchesTechStack =
+        selectedTechStack === 'all' || issue.recommendation.technologyValues.includes(selectedTechStack);
+      const matchesDomain = selectedDomain === 'all' || issue.recommendation.domainValues.includes(selectedDomain);
+      const matchesDifficulty =
+        selectedDifficulty === 'all' || issue.recommendation.difficulty.value === selectedDifficulty;
       const matchesSearch =
         !query ||
         issue.title.toLowerCase().includes(query) ||
-        issue.repositoryName.toLowerCase().includes(query);
+        issue.repositoryName.toLowerCase().includes(query) ||
+        issue.labels.some((label) => label.name.toLowerCase().includes(query));
 
-      return matchesStatus && matchesRepository && matchesLabel && matchesSearch;
+      return (
+        matchesStatus &&
+        matchesRepository &&
+        matchesLabel &&
+        matchesTechStack &&
+        matchesDomain &&
+        matchesDifficulty &&
+        matchesSearch
+      );
     });
 
     return sortIssues(filtered, sortBy);
-  }, [issues, searchQuery, selectedLabel, selectedRepository, sortBy, status]);
+  }, [
+    recommendedIssues,
+    searchQuery,
+    selectedDifficulty,
+    selectedDomain,
+    selectedLabel,
+    selectedRepository,
+    selectedTechStack,
+    sortBy,
+    status,
+  ]);
 
   const stats = useMemo(() => getStats(issues), [issues]);
   const distribution = useMemo(() => getDistribution(issues), [issues]);
@@ -275,7 +364,7 @@ export default function Issues() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Issues Intelligence</h1>
           <p className="mt-2 text-sm text-gray-400">
-            Analyze issue activity across public repositories for {username}.
+            Discover contribution opportunities ranked by skills, domain fit, and repository health for {username}.
           </p>
         </div>
         <button
@@ -316,8 +405,14 @@ export default function Issues() {
               status={status}
               repositories={repositories}
               labels={labels}
+              techStacks={recommendationOptions.techStacks}
+              domains={recommendationOptions.domains}
+              difficulties={recommendationOptions.difficulties}
               selectedRepository={selectedRepository}
               selectedLabel={selectedLabel}
+              selectedTechStack={selectedTechStack}
+              selectedDomain={selectedDomain}
+              selectedDifficulty={selectedDifficulty}
               sortBy={sortBy}
               onStatusChange={(value) => {
                 setStatus(value);
@@ -331,6 +426,18 @@ export default function Issues() {
                 setSelectedLabel(value);
                 resetPaging();
               }}
+              onTechStackChange={(value) => {
+                setSelectedTechStack(value);
+                resetPaging();
+              }}
+              onDomainChange={(value) => {
+                setSelectedDomain(value);
+                resetPaging();
+              }}
+              onDifficultyChange={(value) => {
+                setSelectedDifficulty(value);
+                resetPaging();
+              }}
               onSortChange={(value) => {
                 setSortBy(value);
                 resetPaging();
@@ -342,7 +449,13 @@ export default function Issues() {
             <p>
               Showing {visibleIssues.length} of {filteredIssues.length} issues
             </p>
-            {(searchQuery || status !== 'all' || selectedRepository !== 'all' || selectedLabel !== 'all') && (
+            {(searchQuery ||
+              status !== 'all' ||
+              selectedRepository !== 'all' ||
+              selectedLabel !== 'all' ||
+              selectedTechStack !== 'all' ||
+              selectedDomain !== 'all' ||
+              selectedDifficulty !== 'all') && (
               <button
                 type="button"
                 onClick={() => {
@@ -350,6 +463,9 @@ export default function Issues() {
                   setStatus('all');
                   setSelectedRepository('all');
                   setSelectedLabel('all');
+                  setSelectedTechStack('all');
+                  setSelectedDomain('all');
+                  setSelectedDifficulty('all');
                   resetPaging();
                 }}
                 className="font-medium text-primary-300 transition-colors hover:text-primary-200"
@@ -383,7 +499,9 @@ export default function Issues() {
             <div className="glass-panel border-white/5 p-8 text-center">
               <Archive size={42} className="mx-auto mb-4 text-primary-400" />
               <h3 className="mb-2 text-xl font-bold">No Matching Issues</h3>
-              <p className="text-sm text-gray-400">Try a different search term, status, repository, or label filter.</p>
+              <p className="text-sm text-gray-400">
+                Try a different search term, status, repository, label, tech stack, domain, or difficulty filter.
+              </p>
             </div>
           )}
         </>

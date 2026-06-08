@@ -115,6 +115,12 @@ const fetchRepositoryIssues = async (repository, signal) => {
       repositoryId: repository.id,
       repositoryName: repository.name,
       repositoryFullName: repository.full_name,
+      repositoryLanguage: repository.language || 'Unknown',
+      repositoryTopics: repository.topics || [],
+      repositoryStars: repository.stargazers_count || 0,
+      repositoryForks: repository.forks_count || 0,
+      repositoryOpenIssues: repository.open_issues_count || 0,
+      repositoryUpdatedAt: repository.updated_at,
       labels: issue.labels.map((label) => ({
         id: label.id,
         name: label.name,
