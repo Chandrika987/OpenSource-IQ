@@ -1,4 +1,15 @@
-import { AlertCircle, Calendar, CheckCircle2, ExternalLink, MessageCircle, Tag, User } from 'lucide-react';
+import {
+  AlertCircle,
+  Calendar,
+  CheckCircle2,
+  ExternalLink,
+  GitFork,
+  MessageCircle,
+  Sparkles,
+  Star,
+  Tag,
+  User,
+} from 'lucide-react';
 
 const formatDate = (date) =>
   new Intl.DateTimeFormat('en', {
@@ -11,6 +22,7 @@ const getLabelColor = (color) => `#${color || '6366f1'}`;
 
 export default function IssueCard({ issue }) {
   const isOpen = issue.state === 'open';
+  const recommendation = issue.recommendation;
 
   return (
     <article className="glass-panel group flex min-h-72 flex-col justify-between border-white/5 p-5 transition-colors hover:border-primary-400/30 hover:bg-surface/80">
@@ -31,6 +43,12 @@ export default function IssueCard({ issue }) {
               <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-gray-300">
                 #{issue.number}
               </span>
+              {recommendation && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2.5 py-1 text-xs font-semibold text-cyan-200">
+                  <Sparkles size={13} />
+                  {recommendation.score}% match
+                </span>
+              )}
             </div>
             <a
               href={issue.url}
@@ -72,6 +90,21 @@ export default function IssueCard({ issue }) {
             <span className="text-sm text-gray-500">No labels</span>
           )}
         </div>
+
+        {recommendation && (
+          <div className="mb-5 rounded-lg border border-white/10 bg-white/[0.03] p-3">
+            <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-gray-300">
+              <span className="font-semibold text-white">Why recommended</span>
+              <span className="rounded-full bg-white/5 px-2 py-0.5">{recommendation.difficulty.label}</span>
+              <span className="rounded-full bg-white/5 px-2 py-0.5">{recommendation.domains[0]}</span>
+            </div>
+            <div className="space-y-1.5 text-xs text-gray-400">
+              {recommendation.reasons.slice(0, 3).map((reason) => (
+                <p key={reason}>{reason}</p>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="space-y-4 border-t border-white/10 pt-4 text-sm text-gray-400">
@@ -84,6 +117,18 @@ export default function IssueCard({ issue }) {
             <MessageCircle size={15} className="text-cyan-400" />
             {issue.comments}
           </span>
+          {recommendation && (
+            <>
+              <span className="inline-flex items-center gap-1.5">
+                <Star size={15} className="text-amber-400" />
+                {recommendation.health.stars}
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <GitFork size={15} className="text-emerald-400" />
+                {recommendation.health.forks}
+              </span>
+            </>
+          )}
         </div>
         <div className="grid gap-2 text-xs text-gray-500 sm:grid-cols-2">
           <span className="inline-flex items-center gap-1.5">
