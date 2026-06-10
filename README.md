@@ -103,9 +103,7 @@ OpenSource-IQ/
 | GET | `/api/auth/me` | JWT | Current authenticated user |
 | GET | `/oauth2/authorization/github` | Public | Start GitHub OAuth flow |
 
-## Rate Limits
 
-The frontend fetches data directly from the GitHub REST API (60 requests/hour unauthenticated). Analytics and leaderboard data are cached in `localStorage` for 5–10 minutes to reduce API calls.
 
 ## License
 
