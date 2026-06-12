@@ -20,7 +20,7 @@ AI-powered GitHub contribution intelligence platform. Analyze repositories, issu
 | Backend | Spring Boot 3.2, Java 21, Spring Security, JWT, OAuth2 |
 | Database | PostgreSQL 15 |
 
-## Quick Start
+
 
 ### Prerequisites
 
