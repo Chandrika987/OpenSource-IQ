@@ -27,7 +27,7 @@ AI-powered GitHub contribution intelligence platform. Analyze repositories, issu
 - Node.js 18+
 - Java 21+
 - Docker (for PostgreSQL)
-- Maven 
+- Maven (apache-maven)
 
 ### 1. Start the database
 
