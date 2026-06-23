@@ -1,4 +1,4 @@
-import { BookOpen, Code2, GitFork, Star, Trophy } from 'lucide-react';
+import { BookOpen, Code2, Gauge, GitFork, Star, Trophy } from 'lucide-react';
 
 const StatItem = ({ icon: Icon, label, value, accent }) => (
   <div className="glass-panel min-h-32 border-white/5 p-5">
@@ -16,7 +16,8 @@ const StatItem = ({ icon: Icon, label, value, accent }) => (
 
 export default function RepositoryStats({ stats }) {
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-5">
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+      <StatItem icon={Gauge} label="Overall Repo Score" value={stats.overallScore} accent="text-fuchsia-400" />
       <StatItem icon={BookOpen} label="Total Repositories" value={stats.totalRepositories} accent="text-primary-400" />
       <StatItem icon={Star} label="Total Stars" value={stats.totalStars} accent="text-amber-400" />
       <StatItem icon={GitFork} label="Total Forks" value={stats.totalForks} accent="text-emerald-400" />

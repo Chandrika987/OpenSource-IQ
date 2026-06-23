@@ -9,13 +9,10 @@ export default function OAuthRedirect() {
   const navigate = useNavigate();
   const connect = useAuthStore((state) => state.connect);
   const [error, setError] = useState(null);
+  const token = searchParams.get('token');
 
   useEffect(() => {
-    const token = searchParams.get('token');
-    if (!token) {
-      setError('No authentication token received.');
-      return;
-    }
+    if (!token) return;
 
     const completeAuth = async () => {
       try {
@@ -43,15 +40,17 @@ export default function OAuthRedirect() {
     };
 
     completeAuth();
-  }, [searchParams, connect, navigate]);
+  }, [token, connect, navigate]);
 
-  if (error) {
+  const authenticationError = token ? error : 'No authentication token received.';
+
+  if (authenticationError) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 text-white">
         <div className="glass-panel max-w-md border-red-500/20 bg-red-500/5 p-8 text-center">
           <AlertCircle size={48} className="mx-auto mb-4 text-red-400" />
           <h2 className="mb-2 text-xl font-bold text-red-300">Authentication Failed</h2>
-          <p className="mb-6 text-sm text-gray-400">{error}</p>
+          <p className="mb-6 text-sm text-gray-400">{authenticationError}</p>
           <button
             onClick={() => navigate('/')}
             className="rounded-lg bg-primary-600 px-6 py-2 font-semibold transition-colors hover:bg-primary-500"

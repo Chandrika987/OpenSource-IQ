@@ -89,6 +89,44 @@ const normalizeRepository = (repo) => ({
   topics: repo.topics || [],
 });
 
+export const calculateOverallRepositoryScore = (repositories = []) => {
+  if (!repositories.length) return 0;
+
+  const now = Date.now();
+  const oneYearMs = 365 * 24 * 60 * 60 * 1000;
+  const totalStars = repositories.reduce((sum, repo) => sum + (repo.stars || 0), 0);
+  const totalForks = repositories.reduce((sum, repo) => sum + (repo.forks || 0), 0);
+
+  const engagementScore = Math.min(
+    35,
+    Math.log10(totalStars + 1) * 18 + Math.log10(totalForks + 1) * 10
+  );
+
+  const activeRepositories = repositories.filter((repo) => {
+    const lastActivity = new Date(repo.pushedAt || repo.updatedAt).getTime();
+    return Number.isFinite(lastActivity) && now - lastActivity <= oneYearMs;
+  }).length;
+  const activityScore = (activeRepositories / repositories.length) * 30;
+
+  const completeRepositories = repositories.reduce((sum, repo) => {
+    const metadataFields = [
+      Boolean(repo.description?.trim()),
+      Boolean(repo.language && repo.language !== 'Unknown'),
+      Boolean(repo.homepage?.trim()),
+      Boolean(repo.topics?.length),
+    ];
+    return sum + metadataFields.filter(Boolean).length / metadataFields.length;
+  }, 0);
+  const completenessScore = (completeRepositories / repositories.length) * 20;
+
+  const originalRepositories = repositories.filter((repo) => !repo.isFork).length;
+  const originalityScore = (originalRepositories / repositories.length) * 15;
+
+  return Math.round(
+    Math.min(100, engagementScore + activityScore + completenessScore + originalityScore)
+  );
+};
+
 const fetchAllRepositoryPages = async (username, signal) => {
   const repositories = [];
   let page = 1;
