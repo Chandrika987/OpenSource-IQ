@@ -15,11 +15,17 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     public String githubId;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false, unique = true)
     public String username;
+
+    @Column(name = "provider")
+    public String provider;
+
+    @Column(name = "provider_id", unique = true)
+    public String providerId;
 
     public String email;
 
@@ -71,6 +77,22 @@ public class User {
 
     public void setGithubId(String githubId) {
         this.githubId = githubId;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public String getProviderId() {
+        return providerId;
+    }
+
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
     }
 
     public String getUsername() {

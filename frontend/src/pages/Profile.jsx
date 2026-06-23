@@ -55,8 +55,28 @@ export default function Profile() {
   );
 
   useEffect(() => {
-    loadProfile();
-  }, [loadProfile]);
+    if (!username) {
+      navigate('/');
+      return;
+    }
+
+    let isActive = true;
+
+    getGitHubAnalytics(username)
+      .then((data) => {
+        if (isActive) setAnalytics(data);
+      })
+      .catch((err) => {
+        if (isActive) setError(err.message || 'Unable to load profile data.');
+      })
+      .finally(() => {
+        if (isActive) setLoading(false);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [navigate, username]);
 
   const handleDisconnect = () => {
     signOut();

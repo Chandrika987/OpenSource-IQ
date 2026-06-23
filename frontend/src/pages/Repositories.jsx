@@ -6,7 +6,11 @@ import RepositoryFilters from '../components/repositories/RepositoryFilters';
 import RepositoryInsights from '../components/repositories/RepositoryInsights';
 import RepositoryStats from '../components/repositories/RepositoryStats';
 import SearchBar from '../components/repositories/SearchBar';
-import { getRepositories, getRepositoryCacheMeta } from '../services/repositoryService';
+import {
+  calculateOverallRepositoryScore,
+  getRepositories,
+  getRepositoryCacheMeta,
+} from '../services/repositoryService';
 
 const PAGE_SIZE = 12;
 const numberFormatter = new Intl.NumberFormat('en');
@@ -41,6 +45,7 @@ const getRepositoryStats = (repositories) => {
   const mostStarredRepository = [...repositories].sort((a, b) => b.stars - a.stars)[0]?.name || 'N/A';
 
   return {
+    overallScore: `${calculateOverallRepositoryScore(repositories)}/100`,
     totalRepositories: numberFormatter.format(repositories.length),
     totalStars: numberFormatter.format(totalStars),
     totalForks: numberFormatter.format(totalForks),

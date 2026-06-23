@@ -8,7 +8,6 @@ import {
   Activity,
   User,
   LogOut,
-  Trophy,
   Menu,
   X,
 } from 'lucide-react';
@@ -21,7 +20,6 @@ const navItems = [
   { icon: FolderGit, label: 'Repositories', path: '/repositories', protected: true },
   { icon: GitPullRequest, label: 'Pull Requests', path: '/pull-requests', protected: true },
   { icon: CircleDot, label: 'Issues', path: '/issues', protected: true },
-  { icon: Trophy, label: 'Leaderboard', path: '/leaderboard', protected: false },
   { icon: User, label: 'Profile', path: '/profile', protected: true },
 ];
 

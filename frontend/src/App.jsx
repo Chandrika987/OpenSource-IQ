@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import DashboardLayout from './components/layout/DashboardLayout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -9,17 +9,18 @@ import Repositories from './pages/Repositories';
 import Issues from './pages/Issues';
 import PullRequests from './pages/PullRequests';
 import Profile from './pages/Profile';
-import Leaderboard from './pages/Leaderboard';
 import OAuthRedirect from './pages/OAuthRedirect';
 import GitHubConnect from './components/github/GitHubConnect';
+import SignInModal from './components/auth/SignInModal';
 
 function LandingPage() {
   const [isConnectOpen, setIsConnectOpen] = useState(false);
-  const navigate = useNavigate();
+  const [isSignInOpen, setIsSignInOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background text-white flex flex-col items-center justify-center p-4">
       <GitHubConnect isOpen={isConnectOpen} onClose={() => setIsConnectOpen(false)} />
+      <SignInModal isOpen={isSignInOpen} onClose={() => setIsSignInOpen(false)} />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -46,17 +47,11 @@ function LandingPage() {
             Connect GitHub
           </button>
           <button
-            onClick={() => navigate('/leaderboard')}
-            className="px-8 py-3 rounded-lg bg-surface hover:bg-surface/80 border border-white/10 transition-colors text-white font-semibold"
-          >
-            View Leaderboard
-          </button>
-          <a
-            href="/oauth2/authorization/github"
+            onClick={() => setIsSignInOpen(true)}
             className="px-8 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-white font-semibold"
           >
             Sign in with GitHub
-          </a>
+          </button>
         </div>
       </motion.div>
     </div>
@@ -77,7 +72,6 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/oauth2/redirect" element={<OAuthRedirect />} />
-        <Route path="/leaderboard" element={<DashboardLayout><Leaderboard /></DashboardLayout>} />
         <Route path="/dashboard" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
         <Route path="/analytics" element={<ProtectedLayout><Analytics /></ProtectedLayout>} />
         <Route path="/repositories" element={<ProtectedLayout><Repositories /></ProtectedLayout>} />

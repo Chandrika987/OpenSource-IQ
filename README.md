@@ -9,7 +9,6 @@ AI-powered GitHub contribution intelligence platform. Analyze repositories, issu
 - **Repositories** — Search, filter, and explore all public repos
 - **Issues & Pull Requests** — Aggregated views across repositories
 - **Profile & Portfolio Review** — Consistency score, insights, and recommendations
-- **Leaderboard** — Compare top open source contributors by IQ score
 - **GitHub OAuth** — Optional server-side sign-in with JWT (requires OAuth app)
 
 ## Tech Stack
