@@ -1,7 +1,7 @@
 # OpenSourceIQ
 
 AI-powered GitHub contribution intelligence platform. Analyze repositories, issues, pull requests, and portfolio impact with live GitHub data and rule-based portfolio insights.
---------------------------------------------------------------------------------------------
+
 
 ## Features
 
