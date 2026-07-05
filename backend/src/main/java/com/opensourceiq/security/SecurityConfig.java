@@ -27,7 +27,7 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login/**", "/oauth2/**", "/api/public/**").permitAll()
+                .requestMatchers("/login/**", "/oauth2/**", "/api/public/**", "/api/github/**", "/api/auth/session", "/actuator/health/**").permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2

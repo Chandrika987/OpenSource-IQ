@@ -1,4 +1,6 @@
-const GITHUB_API_BASE_URL = 'https://api.github.com';
+import { apiUrl } from './apiClient';
+
+const GITHUB_API_BASE_URL = apiUrl('/api/github');
 const CACHE_DURATION_MS = 10 * 60 * 1000;
 const inFlightRequests = new Map();
 

@@ -5,6 +5,8 @@ import GitHubStats from '../components/github/GitHubStats';
 import RepositoryList from '../components/github/RepositoryList';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
+import { fetchGitHubRepos, fetchGitHubUser } from '../services/githubApi';
 
 export default function Dashboard() {
   const [profile, setProfile] = useState(null);
@@ -12,9 +14,9 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { username, signOut } = useAuthStore();
 
   useEffect(() => {
-    const username = localStorage.getItem('github_username');
     if (!username) {
       navigate('/');
       return;
@@ -24,25 +26,14 @@ export default function Dashboard() {
       setLoading(true);
       setError(null);
       try {
-        const [profileRes, reposRes] = await Promise.all([
-          fetch(`https://api.github.com/users/${username}`),
-          fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`)
+        const [profileData, reposData] = await Promise.all([
+          fetchGitHubUser(username),
+          fetchGitHubRepos(username)
         ]);
-
-        if (!profileRes.ok || !reposRes.ok) {
-          if (profileRes.status === 403 || reposRes.status === 403) {
-            throw new Error("GitHub API rate limit exceeded. Please try again later.");
-          }
-          throw new Error("Failed to fetch data from GitHub.");
-        }
-
-        const profileData = await profileRes.json();
-        const reposData = await reposRes.json();
 
         setProfile(profileData);
         setRepos(reposData);
       } catch (err) {
-        console.error(err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -50,7 +41,12 @@ export default function Dashboard() {
     };
 
     fetchData();
-  }, [navigate]);
+  }, [navigate, username]);
+
+  const handleDisconnect = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   if (loading) {
     return (
@@ -68,7 +64,7 @@ export default function Dashboard() {
         <h3 className="text-xl font-bold mb-2 text-red-300">Error Loading Data</h3>
         <p className="mb-6">{error}</p>
         <button 
-          onClick={() => { localStorage.removeItem('github_username'); navigate('/'); }}
+          onClick={handleDisconnect}
           className="px-6 py-2 bg-red-500/20 hover:bg-red-500/30 text-white rounded-lg transition-colors border border-red-500/50"
         >
           Disconnect and Try Again

@@ -1,17 +1,18 @@
-import { useState } from 'react';
+import { Suspense, lazy, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import DashboardLayout from './components/layout/DashboardLayout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import Dashboard from './pages/Dashboard';
-import Analytics from './pages/Analytics';
-import Repositories from './pages/Repositories';
-import Issues from './pages/Issues';
-import PullRequests from './pages/PullRequests';
-import Profile from './pages/Profile';
-import OAuthRedirect from './pages/OAuthRedirect';
 import GitHubConnect from './components/github/GitHubConnect';
 import SignInModal from './components/auth/SignInModal';
+
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Analytics = lazy(() => import('./pages/Analytics'));
+const Repositories = lazy(() => import('./pages/Repositories'));
+const Issues = lazy(() => import('./pages/Issues'));
+const PullRequests = lazy(() => import('./pages/PullRequests'));
+const Profile = lazy(() => import('./pages/Profile'));
+const OAuthRedirect = lazy(() => import('./pages/OAuthRedirect'));
 
 function LandingPage() {
   const [isConnectOpen, setIsConnectOpen] = useState(false);
@@ -66,19 +67,25 @@ function ProtectedLayout({ children }) {
   );
 }
 
+function PageFallback() {
+  return <div className="min-h-screen bg-background" />;
+}
+
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/oauth2/redirect" element={<OAuthRedirect />} />
-        <Route path="/dashboard" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
-        <Route path="/analytics" element={<ProtectedLayout><Analytics /></ProtectedLayout>} />
-        <Route path="/repositories" element={<ProtectedLayout><Repositories /></ProtectedLayout>} />
-        <Route path="/pull-requests" element={<ProtectedLayout><PullRequests /></ProtectedLayout>} />
-        <Route path="/issues" element={<ProtectedLayout><Issues /></ProtectedLayout>} />
-        <Route path="/profile" element={<ProtectedLayout><Profile /></ProtectedLayout>} />
-      </Routes>
+      <Suspense fallback={<PageFallback />}>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/oauth2/redirect" element={<OAuthRedirect />} />
+          <Route path="/dashboard" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
+          <Route path="/analytics" element={<ProtectedLayout><Analytics /></ProtectedLayout>} />
+          <Route path="/repositories" element={<ProtectedLayout><Repositories /></ProtectedLayout>} />
+          <Route path="/pull-requests" element={<ProtectedLayout><PullRequests /></ProtectedLayout>} />
+          <Route path="/issues" element={<ProtectedLayout><Issues /></ProtectedLayout>} />
+          <Route path="/profile" element={<ProtectedLayout><Profile /></ProtectedLayout>} />
+        </Routes>
+      </Suspense>
     </Router>
   );
 }

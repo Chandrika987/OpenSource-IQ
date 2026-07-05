@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
+import { fetchGitHubUser } from '../../services/githubApi';
 
 export default function GitHubConnect({ isOpen, onClose }) {
   const [username, setUsername] = useState('');
@@ -20,13 +21,7 @@ export default function GitHubConnect({ isOpen, onClose }) {
     setError(null);
 
     try {
-      const res = await fetch(`https://api.github.com/users/${username}`);
-      if (!res.ok) {
-        if (res.status === 404) throw new Error("GitHub user not found");
-        if (res.status === 403) throw new Error("GitHub API rate limit exceeded");
-        throw new Error("Failed to fetch user");
-      }
-      const data = await res.json();
+      const data = await fetchGitHubUser(username);
 
       connect({ username: data.login, avatarUrl: data.avatar_url });
       setSuccess(true);

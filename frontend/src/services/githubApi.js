@@ -1,4 +1,6 @@
-const GITHUB_API_BASE_URL = 'https://api.github.com';
+import { apiUrl } from './apiClient';
+
+const GITHUB_API_BASE_URL = apiUrl('/api/github');
 
 export const getRateLimitResetMessage = (response) => {
   const reset = response.headers.get('x-ratelimit-reset');
