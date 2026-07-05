@@ -22,6 +22,9 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     private JwtUtils jwtUtils;
 
     @Autowired
+    private AuthTicketService authTicketService;
+
+    @Autowired
     private com.opensourceiq.repository.UserRepository userRepository;
 
     @Value("${app.frontend-url:http://localhost:5173}")
@@ -46,7 +49,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 : String.valueOf(oauth2User.getAttribute("picture"));
 
         User user = userRepository.findByProviderAndProviderId(provider, providerId)
-                .orElseGet(() -> userRepository.findByEmail(email).orElseGet(() -> {
+                .orElseGet(() -> findVerifiedEmailUser(email).orElseGet(() -> {
                     User newUser = new User();
                     newUser.setRole(Role.USER);
                     return newUser;
@@ -61,10 +64,18 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         user.setAvatarUrl(avatarUrl);
         userRepository.save(user);
 
-        String token = jwtUtils.generateTokenFromUsername(login);
+        String token = jwtUtils.generateToken(user);
+        String ticket = authTicketService.createTicket(token);
 
-        // Redirect to frontend with token
-        String redirectUrl = frontendUrl + "/oauth2/redirect?token=" + token;
+        String redirectUrl = frontendUrl + "/oauth2/redirect?ticket=" + ticket;
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
+    }
+
+    private java.util.Optional<User> findVerifiedEmailUser(String email) {
+        if (email == null || email.isBlank()) {
+            return java.util.Optional.empty();
+        }
+
+        return userRepository.findByEmail(email);
     }
 }

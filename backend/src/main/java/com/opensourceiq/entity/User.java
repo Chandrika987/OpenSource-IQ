@@ -8,7 +8,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "users")
+@Table(
+        name = "users",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_users_provider_provider_id", columnNames = {"provider", "provider_id"})
+        },
+        indexes = {
+                @Index(name = "idx_users_provider_lookup", columnList = "provider, provider_id"),
+                @Index(name = "idx_users_email", columnList = "email")
+        }
+)
 public class User {
 
     @Id
@@ -24,7 +33,7 @@ public class User {
     @Column(name = "provider")
     public String provider;
 
-    @Column(name = "provider_id", unique = true)
+    @Column(name = "provider_id")
     public String providerId;
 
     public String email;
