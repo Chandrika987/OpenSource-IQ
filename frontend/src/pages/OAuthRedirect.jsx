@@ -3,34 +3,29 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { fetchGitHubUser } from '../services/githubApi';
+import { requestApi } from '../services/apiClient';
 
 export default function OAuthRedirect() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const connect = useAuthStore((state) => state.connect);
   const [error, setError] = useState(null);
-  const token = searchParams.get('token');
+  const ticket = searchParams.get('ticket');
 
   useEffect(() => {
-    if (!token) return;
+    if (!ticket) return;
 
     const completeAuth = async () => {
       try {
-        const response = await fetch('/api/auth/me', {
-          headers: { Authorization: `Bearer ${token}` },
+        const user = await requestApi('/api/auth/session', {
+          method: 'POST',
+          body: JSON.stringify({ ticket }),
         });
-
-        if (!response.ok) {
-          throw new Error('Failed to verify authentication token.');
-        }
-
-        const user = await response.json();
         const profile = await fetchGitHubUser(user.username);
 
         connect({
           username: user.username,
           avatarUrl: user.avatarUrl || profile.avatar_url,
-          token,
         });
 
         navigate('/dashboard', { replace: true });
@@ -40,9 +35,9 @@ export default function OAuthRedirect() {
     };
 
     completeAuth();
-  }, [token, connect, navigate]);
+  }, [ticket, connect, navigate]);
 
-  const authenticationError = token ? error : 'No authentication token received.';
+  const authenticationError = ticket ? error : 'No authentication ticket received.';
 
   if (authenticationError) {
     return (

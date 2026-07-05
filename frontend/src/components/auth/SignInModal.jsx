@@ -1,9 +1,10 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Globe, ShieldCheck, X } from 'lucide-react';
+import { apiUrl } from '../../services/apiClient';
 
 export default function SignInModal({ isOpen, onClose }) {
   const startOAuth = (provider) => {
-    window.location.href = `/oauth2/authorization/${provider}`;
+    window.location.href = apiUrl(`/oauth2/authorization/${provider}`);
   };
 
   return (
