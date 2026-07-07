@@ -104,7 +104,3 @@ OpenSource-IQ/
 | GET | `/oauth2/authorization/github` | Public | Start GitHub OAuth flow |
 
 
-
-## License
-
-MIT
